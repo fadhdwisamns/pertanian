@@ -7,11 +7,15 @@
                 <i class="fas fa-tachometer-alt me-2"></i> Dashboard
             </a>
         </li>
+        
+        {{-- MENU PETA SIG KHUSUS ADMIN --}}
+        @role('Admin')
         <li>
             <a href="{{ route('dashboard.sig') }}" class="nav-link text-white {{ request()->routeIs('dashboard.sig') ? 'active' : '' }}">
                 <i class="fas fa-map me-2"></i> Peta SIG
             </a>
         </li>
+        @endrole
 
         {{-- MENU KHUSUS ADMIN --}}
         @role('Admin')

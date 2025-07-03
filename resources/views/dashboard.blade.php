@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
 
-    {{-- Kartu Statistik --}}
+    {{-- Kartu Statistik (Tampil untuk semua role) --}}
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-start border-primary border-4 shadow h-100 py-2">
@@ -72,7 +72,81 @@
         </div>
     </div>
 
-    {{-- Area Grafik --}}
+    {{-- KONTEN DINAMIS BERDASARKAN ROLE --}}
+
+    {{-- 1. Tampilan Peta untuk Petani dan Komoditas --}}
+    @hasanyrole('Petani|Komoditas')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <div class="card shadow">
+        <div class="card-header py-3">
+             <h6 class="m-0 fw-bold text-primary">Peta Sebaran Lahan & Kelompok Tani</h6>
+        </div>
+        <div class="card-body">
+            <div id="map" style="height: 600px; width: 100%;"></div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([-0.5336, 101.4452], 10);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var blueIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+
+        var redIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+
+        var lahans = @json($lahans);
+        var kelompokTanis = @json($kelompokTanis);
+
+        lahans.forEach(function(lahan) {
+            if (lahan.latitude && lahan.longitude) {
+                var marker = L.marker([lahan.latitude, lahan.longitude], { icon: blueIcon }).addTo(map);
+                var popupContent = `
+                    <div style="max-width: 200px;">
+                        ${lahan.foto_url ? `<img src="${lahan.foto_url}" alt="Foto Lahan" style="width:100%; height:auto; border-radius: 5px; margin-bottom: 5px;">` : ''}
+                        <strong>${lahan.nama_lahan}</strong><br>
+                        <strong>Pemilik:</strong> ${lahan.nama_petani}<br>
+                        <strong>Luas:</strong> ${lahan.luas_lahan} Ha<br>
+                        <strong>Produksi:</strong> ${lahan.jumlah_produksi}<br>
+                        <strong>Kontak:</strong> <a href="https://wa.me/${lahan.no_wa}" target="_blank">${lahan.no_wa}</a>
+                    </div>
+                `;
+                marker.bindPopup(popupContent);
+            }
+        });
+
+        kelompokTanis.forEach(function(kelompok) {
+            var marker = L.marker([kelompok.latitude, kelompok.longitude], { icon: redIcon }).addTo(map);
+            var popupContent = `
+                <div style="max-width: 200px;">
+                    <strong>${kelompok.nama_kelompok}</strong><br>
+                    <hr style="margin: 2px 0;">
+                    <strong>Desa:</strong> ${kelompok.desa}<br>
+                    <strong>Komoditas:</strong> ${kelompok.komoditas_unggulan}<br>
+                    <strong>Ketua:</strong> ${kelompok.ketua_kelompok}<br>
+                    <strong>Tahun Berdiri:</strong> ${kelompok.tahun_berdiri}
+                </div>
+            `;
+            marker.bindPopup(popupContent);
+        });
+    </script>
+    @endpush
+    @endhasanyrole
+
+    {{-- 2. Tampilan Grafik untuk Admin --}}
+    @role('Admin')
     <div class="row">
         <div class="col-xl-8 col-lg-7">
             <div class="card shadow mb-4">
@@ -98,14 +172,11 @@
     </div>
 
     @push('scripts')
-    {{-- CDN Chart.js untuk membuat grafik --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Ambil data yang dikirim dari controller
         const kelompokData = @json($kelompokPerKecamatan);
         const komoditasData = @json($komoditasPopuler);
 
-        // 1. Grafik Batang (Bar Chart) - Kelompok Tani per Kecamatan
         const ctxBar = document.getElementById('kelompokPerKecamatanChart');
         new Chart(ctxBar, {
             type: 'bar',
@@ -119,15 +190,9 @@
                     borderWidth: 1
                 }]
             },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
         });
 
-        // 2. Grafik Lingkaran (Pie Chart) - Komoditas Populer
         const ctxPie = document.getElementById('komoditasPopulerChart');
         new Chart(ctxPie, {
             type: 'pie',
@@ -145,10 +210,10 @@
                     hoverOffset: 4
                 }]
             },
-            options: {
-                responsive: true,
-            }
+            options: { responsive: true }
         });
     </script>
     @endpush
+    @endrole
+
 </x-app-layout>
