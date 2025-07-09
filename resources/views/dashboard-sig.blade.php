@@ -75,7 +75,7 @@
             // Konten untuk popup info kelompok tani
             var popupContent = `
                 <div style="max-width: 200px;">
-                    ${kelompok.foto_url ? `<img src="${kelompok.foto_url}" alt="Foto Kelompok Tani" style="width:100%; height:auto; border-radius: 5px; margin-bottom: 5px;">` : ''}
+                    ${kelompok.foto_kelompok_tani ? `<img src="${kelompok.foto_kelompok_tani}" alt="Foto Kelompok Tani" style="width:100%; height:auto; border-radius: 5px; margin-bottom: 5px;">` : ''}
                     <strong>${kelompok.nama_kelompok}</strong><br>
                     <hr style="margin: 2px 0;">
                     <strong>Desa:</strong> ${kelompok.desa}<br>

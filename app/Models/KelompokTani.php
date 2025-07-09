@@ -26,4 +26,15 @@ class KelompokTani extends Model
             'user_id'                 // Foreign key di pivot untuk model tujuan (User)
         );
     }
+    public function getFotoUrlAttribute()
+    {
+        if ($this->foto_lokasi) {
+            // Fungsi ini akan mengubah path yang tersimpan (misal: 'foto_kelompok_tani/namafile.jpg')
+            // menjadi URL yang bisa diakses publik (misal: 'http://domain.com/storage/foto_kelompok_tani/namafile.jpg')
+            return Storage::url($this->foto_lokasi);
+        }
+
+        // Kembalikan null atau path ke gambar default jika tidak ada foto
+        return null;
+    }
 }
