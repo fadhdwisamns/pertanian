@@ -113,13 +113,19 @@
         lahans.forEach(function(lahan) {
             if (lahan.latitude && lahan.longitude) {
                 var marker = L.marker([lahan.latitude, lahan.longitude], { icon: blueIcon }).addTo(map);
+                
+                // --- KONTEN POPUP YANG DIPERBARUI ---
+                var isProduktif = lahan.status_produktif !== 'Tidak Produktif';
+                var produksiText = isProduktif && lahan.jumlah_produksi ? `<strong>Produksi:</strong> ${lahan.jumlah_produksi}<br>` : '';
+
                 var popupContent = `
                     <div style="max-width: 200px;">
                         ${lahan.foto_url ? `<img src="${lahan.foto_url}" alt="Foto Lahan" style="width:100%; height:auto; border-radius: 5px; margin-bottom: 5px;">` : ''}
                         <strong>${lahan.nama_lahan}</strong><br>
                         <strong>Pemilik:</strong> ${lahan.nama_petani}<br>
                         <strong>Luas:</strong> ${lahan.luas_lahan} Ha<br>
-                        <strong>Produksi:</strong> ${lahan.jumlah_produksi}<br>
+                        <strong>Status:</strong> ${isProduktif ? 'Masih Produktif' : 'Tidak Produktif'}<br>
+                        ${produksiText}
                         <strong>Kontak:</strong> <a href="https://wa.me/${lahan.no_wa}" target="_blank">${lahan.no_wa}</a>
                     </div>
                 `;

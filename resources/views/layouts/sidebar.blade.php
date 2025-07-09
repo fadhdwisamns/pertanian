@@ -21,12 +21,12 @@
         @role('Admin')
         <li>
              <a href="{{ route('kelompok-tani.report') }}" class="nav-link text-white {{ request()->routeIs('kelompok-tani.report') ? 'active' : '' }}">
-                <i class="fas fa-file-alt me-2"></i> Laporan Lahan
+                <i class="fas fa-file-alt me-2"></i> Laporan Komoditas
             </a>
         </li>
         <li>
         <a href="{{ route('reports.index') }}" class="nav-link text-white {{ request()->routeIs('reports.*') ? 'active' : '' }}">
-            <i class="fas fa-file-alt me-2"></i> Laporan Komoditas
+            <i class="fas fa-file-alt me-2"></i> Laporan Lahan
         </a>
     </li>
         <li>

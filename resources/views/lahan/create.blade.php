@@ -36,9 +36,18 @@
                         <label for="luas_lahan" class="form-label">Luas Lahan (Hektar)</label>
                         <input type="number" step="0.01" name="luas_lahan" class="form-control" required>
                     </div>
+                    {{-- INPUT BARU UNTUK STATUS PRODUKTIVITAS --}}
+                    <div class="col-md-6 mb-3">
+                        <label for="status_produktif" class="form-label">Status Produktivitas</label>
+                        <select name="status_produktif" id="status_produktif" class="form-control" required>
+                            <option value="Produktif" selected>Masih Produktif</option>
+                            <option value="Tidak Produktif">Tidak Produktif</option>
+                        </select>
+                    </div>
+                    {{-- INPUT JUMLAH PRODUKSI SEKARANG DI BAWAH STATUS --}}
                     <div class="col-md-6 mb-3">
                         <label for="jumlah_produksi" class="form-label">Jumlah Produksi</label>
-                        <input type="text" name="jumlah_produksi" class="form-control" placeholder="Contoh: 5 Ton / Musim" required>
+                        <input type="text" name="jumlah_produksi" id="jumlah_produksi" class="form-control" placeholder="Contoh: 5 Ton / Musim" required>
                     </div>
                      <div class="col-md-6 mb-3">
                         <label for="no_wa" class="form-label">Nomor WhatsApp</label>
@@ -66,8 +75,8 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    {{-- Script maps tidak diubah --}}
     <script>
+        // --- Script untuk Leaflet Map ---
         var defaultLocation = @json($defaultLocation);
         var map = L.map('map').setView(defaultLocation, 11);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
@@ -92,6 +101,27 @@
             var position = marker.getLatLng();
             document.getElementById('latitude').value = position.lat;
             document.getElementById('longitude').value = position.lng;
+        });
+
+        // --- Script untuk menonaktifkan input produksi ---
+        document.addEventListener('DOMContentLoaded', function () {
+            const statusSelect = document.getElementById('status_produktif');
+            const produksiInput = document.getElementById('jumlah_produksi');
+
+            function toggleProduksiInput() {
+                if (statusSelect.value === 'Tidak Produktif') {
+                    produksiInput.disabled = true;
+                    produksiInput.value = '';
+                    produksiInput.required = false;
+                } else {
+                    produksiInput.disabled = false;
+                    produksiInput.required = true;
+                }
+            }
+            // Panggil fungsi saat halaman dimuat
+            toggleProduksiInput();
+            // Panggil fungsi saat dropdown berubah
+            statusSelect.addEventListener('change', toggleProduksiInput);
         });
     </script>
 </x-app-layout>

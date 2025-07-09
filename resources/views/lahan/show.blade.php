@@ -13,7 +13,6 @@
                 <div class="col-md-6">
                     <h4>Informasi Lahan</h4>
                     <table class="table table-borderless">
-                        {{-- TAMBAHKAN BARIS INI UNTUK NAMA PETANI --}}
                         <tr>
                             <th width="30%">Nama Petani</th>
                             <td>: {{ $lahan->nama_petani }}</td>
@@ -26,10 +25,17 @@
                             <th>Luas Lahan</th>
                             <td>: {{ $lahan->luas_lahan }} Ha</td>
                         </tr>
+                        {{-- MENAMPILKAN STATUS DAN JUMLAH PRODUKSI SECARA KONDISIONAL --}}
+                        <tr>
+                            <th>Status Produktivitas</th>
+                            <td>: {{ $lahan->status_produktif ?? 'Produktif' }}</td>
+                        </tr>
+                        @if($lahan->status_produktif != 'Tidak Produktif' && $lahan->jumlah_produksi)
                         <tr>
                             <th>Jumlah Produksi</th>
                             <td>: {{ $lahan->jumlah_produksi }}</td>
                         </tr>
+                        @endif
                         <tr>
                             <th>Nomor WhatsApp</th>
                             <td>: {{ $lahan->no_wa }}</td>
@@ -65,7 +71,6 @@
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // Marker dibuat tidak bisa di-drag karena ini halaman show
         var marker = L.marker(initialLocation).addTo(map);
 
     </script>

@@ -31,7 +31,8 @@ class LahanController extends Controller
             'nama_petani' => 'required|string|max:255',
             'nama_lahan' => 'required|string|max:255',
             'luas_lahan' => 'required|numeric',
-            'jumlah_produksi' => 'required|string|max:255',
+            'status_produktif' => 'required|string|in:Produktif,Tidak Produktif',
+            'jumlah_produksi' => 'nullable|string|max:255',
             'no_wa' => 'required|string|max:20',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
@@ -40,6 +41,11 @@ class LahanController extends Controller
 
         $dataToSave = $validatedData;
         $dataToSave['user_id'] = Auth::id();
+
+        // Jika status "Tidak Produktif", pastikan jumlah_produksi adalah null
+        if ($request->status_produktif == 'Tidak Produktif') {
+            $dataToSave['jumlah_produksi'] = null;
+        }
 
         if ($request->hasFile('foto_lahan')) {
             $dataToSave['foto_lahan'] = $request->file('foto_lahan')->store('foto_lahan', 'public');
@@ -63,12 +69,13 @@ class LahanController extends Controller
 
     public function update(Request $request, Lahan $lahan)
     {
-        // Perbaiki validasi di sini, hapus 'user_id' dan tambahkan 'nama_petani'
+        // Perbaiki validasi di sini, tambahkan 'status_produktif' dan buat 'jumlah_produksi' nullable
         $request->validate([
             'nama_petani' => 'required|string|max:255',
             'nama_lahan' => 'required|string|max:255',
             'luas_lahan' => 'required|numeric',
-            'jumlah_produksi' => 'required|string|max:255',
+            'status_produktif' => 'required|string|in:Produktif,Tidak Produktif',
+            'jumlah_produksi' => 'nullable|string|max:255',
             'no_wa' => 'required|string|max:20',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
@@ -76,6 +83,11 @@ class LahanController extends Controller
         ]);
 
         $data = $request->except('foto_lahan');
+
+        // Jika status "Tidak Produktif", pastikan jumlah_produksi adalah null
+        if ($request->status_produktif == 'Tidak Produktif') {
+            $data['jumlah_produksi'] = null;
+        }
 
         if ($request->hasFile('foto_lahan')) {
             if ($lahan->foto_lahan) {
