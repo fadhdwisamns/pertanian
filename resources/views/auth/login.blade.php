@@ -101,7 +101,7 @@
                                     <h1 class="h2 fw-bold mb-3">
                                         Sistem Informasi Pertanian
                                     </h1>
-                                    <p class="fs-5 opacity-75">Pertanian Bogor</p>
+                                    <p class="fs-5 opacity-75"> Pertanian Kabupaten Kuantan singingi </p>
                                 </div>
                             </div>
 
