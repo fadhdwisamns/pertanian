@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\KelompokTani;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use PDF;
 
@@ -11,7 +12,10 @@ class KelompokTaniController extends Controller
 {
     public function index()
     {
-        $kelompokTani = KelompokTani::latest()->paginate(10);
+        $kelompokTani = KelompokTani::where('user_id', Auth::id())
+            ->latest()
+            ->paginate(10);
+
         return view('pages.kelompok-tani.index', compact('kelompokTani'));
     }
     public function create()
@@ -40,6 +44,8 @@ class KelompokTaniController extends Controller
 
         $data = $request->all();
 
+        $data['user_id'] = Auth::id();
+
         if ($request->hasFile('foto_lokasi')) {
             $data['foto_lokasi'] = $request->file('foto_lokasi')->store('foto_kelompok_tani', 'public');
         }
@@ -49,19 +55,27 @@ class KelompokTaniController extends Controller
         return redirect()->route('kelompok-tani.index')
             ->with('success', 'Data Kelompok Tani berhasil ditambahkan.');
     }
-
     public function show(KelompokTani $kelompokTani)
     {
-        return view('pages.kelompok-tani.show', compact('kelompokTani'));
+        if ($kelompokTani->user_id !== Auth::id()) {
+            abort(403, 'ANDA TIDAK MEMILIKI AKSES KE DATA INI.');
+        }
     }
 
     public function edit(KelompokTani $kelompokTani)
     {
-        return view('pages.kelompok-tani.edit', compact('kelompokTani'));
+       if ($kelompokTani->user_id !== Auth::id()) {
+            abort(403, 'ANDA TIDAK MEMILIKI AKSES KE DATA INI.');
+        }
     }
 
-    public function update(Request $request, KelompokTani $kelompokTani)
+     public function update(Request $request, KelompokTani $kelompokTani)
     {
+
+        if ($kelompokTani->user_id !== Auth::id()) {
+            abort(403, 'ANDA TIDAK MEMILIKI AKSES KE DATA INI.');
+        }
+
         $request->validate([
             'kecamatan' => 'required|string|max:255',
             'desa' => 'required|string|max:255',
@@ -83,41 +97,38 @@ class KelompokTaniController extends Controller
             ->with('success', 'Data Kelompok Tani berhasil diperbarui.');
     }
 
-
     public function destroy(KelompokTani $kelompokTani)
     {
+        // MODIFIKASI: Pastikan user hanya bisa menghapus datanya sendiri
+        if ($kelompokTani->user_id !== Auth::id()) {
+            abort(403, 'ANDA TIDAK MEMILIKI AKSES KE DATA INI.');
+        }
+
         $kelompokTani->delete();
 
         return redirect()->route('kelompok-tani.index')
             ->with('success', 'Data Kelompok Tani berhasil dihapus.');
     }
 
-    /**
-     * Menampilkan halaman report dengan form filter.
-     */
     public function report()
     {
-        // Ambil data unik untuk filter dropdown
-        $tahuns = KelompokTani::select('tahun_berdiri')->distinct()->orderBy('tahun_berdiri', 'desc')->pluck('tahun_berdiri');
-        $desas = KelompokTani::select('desa')->distinct()->orderBy('desa', 'asc')->pluck('desa');
+        // MODIFIKASI: Ambil data unik (tahun, desa) hanya dari data milik user
+        $baseQuery = KelompokTani::where('user_id', Auth::id());
 
-        // Kirim data ke view
+        $tahuns = (clone $baseQuery)->select('tahun_berdiri')->distinct()->orderBy('tahun_berdiri', 'desc')->pluck('tahun_berdiri');
+        $desas = (clone $baseQuery)->select('desa')->distinct()->orderBy('desa', 'asc')->pluck('desa');
+
         return view('pages.kelompok-tani.report', compact('tahuns', 'desas'));
     }
 
-    /**
-     * Membuat dan mengunduh laporan dalam format PDF berdasarkan filter.
-     */
     public function cetakPdf(Request $request)
     {
-        // Mulai query dasar
-        $query = KelompokTani::query();
+        // MODIFIKASI: Mulai query dasar dengan memfilter berdasarkan user_id
+        $query = KelompokTani::where('user_id', Auth::id());
 
-        // Ambil nilai filter dari request
         $tahun = $request->input('tahun');
         $desa = $request->input('desa');
 
-        // Terapkan filter jika ada nilainya
         if ($tahun) {
             $query->where('tahun_berdiri', $tahun);
         }
@@ -126,19 +137,11 @@ class KelompokTaniController extends Controller
             $query->where('desa', $desa);
         }
 
-        // Eksekusi query untuk mendapatkan data yang sudah difilter
         $kelompokTani = $query->get();
-        
-        // Simpan nilai filter untuk ditampilkan di header PDF
         $filters = $request->only(['tahun', 'desa']);
-
-        // Buat PDF dengan data yang sudah difilter
         $pdf = PDF::loadView('pages.kelompok-tani.pdf', compact('kelompokTani', 'filters'));
-
-        // Atur orientasi kertas
         $pdf->setPaper('a4', 'landscape');
 
-        // Tampilkan atau unduh PDF
         return $pdf->stream('laporan-kelompok-tani.pdf');
     }
 }

@@ -82,6 +82,15 @@ class DashboardController extends Controller
 
         // Ambil data kelompok tani yang memiliki koordinat
         $kelompokTanis = KelompokTani::whereNotNull('latitude')->whereNotNull('longitude')->get();
+        // Proses untuk menambahkan URL foto pada kelompok tani
+        $kelompokTanis->each(function ($kelompok) {
+            if ($kelompok->foto_lokasi) {
+                // Buat atribut baru 'foto_lokasi' yang berisi URL lengkap
+                $kelompok->foto_lokasi = asset('storage/' . $kelompok->foto_lokasi);
+            } else {
+                $kelompok->foto_lokasi = null;  // Atau bisa di-set ke URL gambar default       
+            }
+        });
 
         // Kirim kedua data ke view
         return view('dashboard-sig', compact('lahans', 'kelompokTanis'));

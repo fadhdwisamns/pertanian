@@ -114,6 +114,7 @@
             if (lahan.latitude && lahan.longitude) {
                 var marker = L.marker([lahan.latitude, lahan.longitude], { icon: blueIcon }).addTo(map);
                 
+                
                 // --- KONTEN POPUP YANG DIPERBARUI ---
                 var isProduktif = lahan.status_produktif !== 'Tidak Produktif';
                 var produksiText = isProduktif && lahan.jumlah_produksi ? `<strong>Produksi:</strong> ${lahan.jumlah_produksi}<br>` : '';
@@ -135,7 +136,9 @@
 
         kelompokTanis.forEach(function(kelompok) {
             var marker = L.marker([kelompok.latitude, kelompok.longitude], { icon: redIcon }).addTo(map);
+            console.log("Foto Lokasi:", kelompok.foto_lokasi);
             var popupContent = `
+            
                 <div style="max-width: 200px;">
                     ${kelompok.foto_lokasi ? `<img src="${kelompok.foto_lokasi}" alt="Foto Kelompok Tani" style="width:100%; height:auto; border-radius: 5px; margin-bottom: 5px;">` : ''}
                     <strong>${kelompok.nama_kelompok}</strong><br>
